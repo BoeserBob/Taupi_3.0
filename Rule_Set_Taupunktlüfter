@@ -1,0 +1,31 @@
+// Rule Set für einen Taupunktlüfter auf einem ESP32 mit ESP Easy Firmware
+
+On innen#temperature do
+
+if [innen#temperature]>9 and [innen#humidity]>55  //nur wenn warm genug und feucht genug Lüfter aktivieren
+
+if %c_dew_th%([innen#temperature],[innen#humidity]) > %c_dew_th%([aussen#temperature],[rechner#aussen_gemittelt])+4 //Berechnung auf Basis Mittelwertbildung
+
+       SendToHTTP 192.168.50.21,80,/relay/0?turn=on
+       gpio,2,1
+
+     else
+
+       SendToHTTP 192.168.50.21,80,/relay/0?turn=off
+       gpio,2,0
+
+     endif
+
+
+else 
+
+   SendToHTTP 192.168.50.21,80,/relay/0?turn=off //ausschalten wenn zu kalt und zu trocken
+   gpio,2,0
+
+endif
+
+
+SendToHTTP 192.168.50.22,80,/relay/0?turn=on&timer=43200 // Watchdog Timer zurücksetzen
+
+
+endon
